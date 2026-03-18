@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Step 4 Inventory</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --surface2: #f3f2ef;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text2: #5a5a56;
+    --text3: #9a9994;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1e1b;
+      --surface2: #282825;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --text: #f0ede8;
+      --text2: #9a9892;
+      --text3: #5e5d59;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 1rem 1.25rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+  }
+
+  .app-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .app-sub {
+    font-size: 13px;
+    color: var(--text3);
+  }
+
+  .nav {
+    display: flex;
+    gap: 0;
+  }
+
+  .nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px 0;
+    font-size: 14px;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .nav button.active {
+    color: var(--text);
+    font-weight: 500;
+    border-bottom-color: var(--text);
+  }
+
+  .content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .page-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+  }
+
+  .type-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .type-btn {
+    flex: 1;
+    padding: 9px 4px;
+    text-align: center;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    background: var(--surface);
+    transition: all 0.12s;
+    font-family: inherit;
+  }
+
+  .type-btn.active {
+    border: 2px solid var(--text);
+    color: var(--text);
+    font-weight: 500;
+    background: var(--surface);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--text);
+  }
+
+  textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .check-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 0.5px solid var(--border2);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    background: var(--surface2);
+    user-select: none;
+    transition: all 0.12s;
+    font-family: inherit;
+  }
+
+  .check-pill.selected {
+    background: var(--text);
+    color: var(--bg);
+    border-color: transparent;
+  }
+
+  .check-pill input { display: none; }
+
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 13px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.8; }
+  .btn-primary:disabled { opacity: 0.35; cursor: default; }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 0.5px solid var(--border2);
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    font-family: inherit;
+  }
+
+  .ai-box {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    background: var(--surface2);
+    margin-top: 1rem;
+  }
+
+  .ai-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .ai-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .ai-loading {
+    font-size: 14px;
+    color: var(--text2);
+    font-style: italic;
+  }
+
+  .entry-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .entry-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-resentment { background: #FEF3C7; color: #92400E; }
+  .badge-fear { background: #EDE9FE; color: #4C1D95; }
+  .badge-relationship { background: #D1FAE5; color: #065F46; }
+
+  @media (prefers-color-scheme: dark) {
+    .badge-resentment { background: #3D2E0A; color: #FCD34D; }
+    .badge-fear { background: #2D1B69; color: #C4B5FD; }
+    .badge-relationship { background: #064E3B; color: #6EE7B7; }
+  }
+
+  .entry-subject {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .entry-body {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .entry-part {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 0.5px solid var(--border);
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .entry-part strong { color: var(--text); font-weight: 500; }
+
+  .entry-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .entry-affects {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .entry-date {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+
+  .stat-lbl {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .pattern-row {
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pattern-row:last-child { border-bottom: none; }
+  .pattern-count { font-size: 13px; color: var(--text2); }
+
+  .empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+
+  .section-heading {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 10px;
+  }
+
+  /* API key prompt */
+  .api-setup {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .api-setup h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .api-setup p {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .api-setup a { color: var(--text); }
+
+  .api-row { display: flex; gap: 8px; }
+  .api-row input { flex: 1; }
+  .api-row button { flex-shrink: 0; width: auto; padding: 10px 16px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="app-title">Step 4</span>
+    <span class="app-sub">Moral inventory</span>
+  </div>
+  <nav class="nav">
+    <button class="active" onclick="showSection('new', this)">New entry</button>
+    <button onclick="showSection('entries', this)">Inventory</button>
+    <button onclick="showSection('patterns', this)">Patterns</button>
+  </nav>
+</div>
+
+<div class="content">
+
+  <!-- API Key Setup -->
+  <div class="api-setup" id="api-setup" style="display:none;">
+    <h2>Connect to Claude AI</h2>
+    <p>To get AI reflections on your entries, add your Anthropic API key. Your key is stored only on this device and never sent anywhere except Anthropic's servers. Get a key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</p>
+    <div class="api-row">
+      <input class="form-input" type="password" id="api-key-input" placeholder="sk-ant-..." />
+      <button class="btn-primary" onclick="saveApiKey()" style="width:auto; padding: 10px 16px;">Save</button>
+    </div>
+    <button class="btn-secondary" onclick="skipApiKey()">Skip — use without AI reflections</button>
+  </div>
+
+  <!-- New Entry -->
+  <div id="sec-new" class="section active">
+    <p class="page-sub">Work through one entry at a time, thoroughly and honestly.</p>
+
+    <div class="type-selector">
+      <button class="type-btn active" onclick="setType('resentment', this)">Resentment</button>
+      <button class="type-btn" onclick="setType('fear', this)">Fear</button>
+      <button class="type-btn" onclick="setType('relationship', this)">Relationship</button>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label" id="subject-label">Who or what do you resent?</label>
+        <input class="form-input" id="subject" placeholder="Person, institution, or principle" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="cause-label">What did they do? (The cause)</label>
+        <textarea class="form-input" id="cause" placeholder="Describe what happened..."></textarea>
+      </div>
+      <div class="form-group" id="affects-group">
+        <label class="form-label">What area of self does this affect?</label>
+        <div class="checkbox-group">
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="self-esteem"> Self-esteem</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="security"> Security</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="ambitions"> Ambitions</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="personal-relations"> Personal relations</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="sex-relations"> Sex relations</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="pride"> Pride</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="fear"> Fear</label>
+          <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="pocket-book"> Pocket-book</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="mypart-label">What was your part?</label>
+        <textarea class="form-input" id="mypart" placeholder="Where were you selfish, dishonest, self-seeking, or frightened?"></textarea>
+      </div>
+      <button class="btn-primary" id="save-btn" onclick="saveEntry()">Save entry</button>
+    </div>
+
+    <div class="ai-box" id="ai-response" style="display:none;">
+      <div class="ai-label">Reflection</div>
+      <div id="ai-text" class="ai-text"></div>
+    </div>
+  </div>
+
+  <!-- Inventory -->
+  <div id="sec-entries" class="section">
+    <p class="page-sub">Your entries so far.</p>
+    <div id="entries-list"></div>
+  </div>
+
+  <!-- Patterns -->
+  <div id="sec-patterns" class="section">
+    <p class="page-sub">Themes and recurrences across your inventory.</p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="p-total">0</div><div class="stat-lbl">entries</div></div>
+      <div class="stat-card"><div class="stat-num" id="p-res">0</div><div class="stat-lbl">resentments</div></div>
+      <div class="stat-card"><div class="stat-num" id="p-fear">0</div><div class="stat-lbl">fears</div></div>
+    </div>
+    <div class="card">
+      <p class="section-heading">Most affected areas of self</p>
+      <div id="affects-pattern"></div>
+    </div>
+    <div class="card">
+      <p class="section-heading">Recurring subjects</p>
+      <div id="subjects-pattern"></div>
+    </div>
+    <button class="btn-primary" onclick="getPatternReflection()">Ask for pattern reflection</button>
+    <div class="ai-box" id="pattern-ai" style="display:none; margin-top:1rem;">
+      <div class="ai-label">Pattern reflection</div>
+      <div id="pattern-ai-text" class="ai-text"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentType = 'resentment';
+let entries = [];
+let apiKey = '';
+let apiKeySet = false;
+
+function init() {
+  entries = JSON.parse(localStorage.getItem('step4_entries') || '[]');
+  apiKey = localStorage.getItem('step4_apikey') || '';
+  apiKeySet = localStorage.getItem('step4_apikey_set') === 'true';
+  if (!apiKeySet) {
+    document.getElementById('api-setup').style.display = 'block';
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (val) {
+    apiKey = val;
+    localStorage.setItem('step4_apikey', val);
+  }
+  localStorage.setItem('step4_apikey_set', 'true');
+  apiKeySet = true;
+  document.getElementById('api-setup').style.display = 'none';
+}
+
+function skipApiKey() {
+  localStorage.setItem('step4_apikey_set', 'true');
+  apiKeySet = true;
+  document.getElementById('api-setup').style.display = 'none';
+}
+
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'entries') renderEntries();
+  if (name === 'patterns') renderPatterns();
+}
+
+function setType(type, el) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const labels = {
+    resentment: { subject: 'Who or what do you resent?', cause: 'What did they do? (The cause)', mypart: 'What was your part in this?' },
+    fear: { subject: 'What are you afraid of?', cause: 'Why do you have this fear?', mypart: 'How has this fear driven your behavior?' },
+    relationship: { subject: 'Who is this about?', cause: 'What happened or what is the issue?', mypart: 'What was your part — where did you fall short?' }
+  };
+  document.getElementById('subject-label').textContent = labels[type].subject;
+  document.getElementById('cause-label').textContent = labels[type].cause;
+  document.getElementById('mypart-label').textContent = labels[type].mypart;
+  document.getElementById('affects-group').style.display = type === 'fear' ? 'none' : 'block';
+  document.getElementById('ai-response').style.display = 'none';
+}
+
+function togglePill(el) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedAffects() {
+  return Array.from(document.querySelectorAll('.check-pill.selected input')).map(i => i.value);
+}
+
+async function saveEntry() {
+  const subject = document.getElementById('subject').value.trim();
+  const cause = document.getElementById('cause').value.trim();
+  const mypart = document.getElementById('mypart').value.trim();
+  if (!subject || !cause) { alert('Please fill in at least the subject and cause.'); return; }
+
+  const affects = getSelectedAffects();
+  const entry = {
+    id: Date.now(), type: currentType, subject, cause, affects, mypart,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  };
+  entries.unshift(entry);
+  localStorage.setItem('step4_entries', JSON.stringify(entries));
+
+  clearForm();
+
+  if (apiKey) {
+    document.getElementById('save-btn').disabled = true;
+    document.getElementById('ai-response').style.display = 'block';
+    document.getElementById('ai-text').innerHTML = '<span class="ai-loading">Reflecting on your entry...</span>';
+    await getReflection(entry);
+    document.getElementById('save-btn').disabled = false;
+  } else {
+    document.getElementById('ai-response').style.display = 'block';
+    document.getElementById('ai-text').textContent = 'Entry saved. Add an API key in the setup banner to get AI reflections.';
+  }
+}
+
+function buildPrompt(entry) {
+  let p = `The person is working Step 4 of AA using the Big Book format.\n\nEntry type: ${entry.type}\n`;
+  if (entry.type === 'resentment') p += `Who/what: ${entry.subject}\nThe cause: ${entry.cause}\nAreas affected: ${entry.affects.join(', ') || 'not specified'}\nTheir part: ${entry.mypart || '(left blank)'}`;
+  else if (entry.type === 'fear') p += `The fear: ${entry.subject}\nWhy this fear exists: ${entry.cause}\nHow it's driven behavior: ${entry.mypart || '(left blank)'}`;
+  else p += `Who: ${entry.subject}\nThe issue: ${entry.cause}\nAreas affected: ${entry.affects.join(', ') || 'not specified'}\nTheir part: ${entry.mypart || '(left blank)'}`;
+  return p;
+}
+
+async function getReflection(entry) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a compassionate, experienced AA sponsor helping someone work Step 4 — a searching and fearless moral inventory. You follow the Big Book's approach closely. You are warm, direct, and spiritually grounded. Your job is NOT to be a therapist or give advice. You help the person go deeper into their inventory by: 1) Reflecting back what you hear with compassion, 2) Asking 1-2 specific follow-up questions to help them see more clearly — especially about their own part, 3) Gently noting if the "my part" section seems incomplete or avoidant. Never be preachy or lecture. Keep responses to 3-5 short paragraphs. Plain prose only.`,
+        messages: [{ role: 'user', content: buildPrompt(entry) }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    document.getElementById('ai-text').textContent = data.content.map(b => b.text || '').join('\n');
+  } catch(e) {
+    document.getElementById('ai-text').textContent = 'Could not connect to Claude AI. Check your API key. Your entry has been saved.';
+  }
+}
+
+function clearForm() {
+  document.getElementById('subject').value = '';
+  document.getElementById('cause').value = '';
+  document.getElementById('mypart').value = '';
+  document.querySelectorAll('.check-pill.selected').forEach(p => p.classList.remove('selected'));
+}
+
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-state">No entries yet.<br>Start with your first resentment, fear, or relationship.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(e => {
+    const bc = e.type === 'resentment' ? 'badge-resentment' : e.type === 'fear' ? 'badge-fear' : 'badge-relationship';
+    return `<div class="entry-card">
+      <span class="entry-type-badge ${bc}">${e.type}</span>
+      <div class="entry-subject">${esc(e.subject)}</div>
+      <div class="entry-body">${esc(e.cause)}</div>
+      ${e.mypart ? `<div class="entry-part"><strong>My part:</strong> ${esc(e.mypart)}</div>` : ''}
+      <div class="entry-meta-row">
+        <span class="entry-affects">${(e.affects||[]).join(', ')}</span>
+        <span class="entry-date">${e.date}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderPatterns() {
+  document.getElementById('p-total').textContent = entries.length;
+  document.getElementById('p-res').textContent = entries.filter(e=>e.type==='resentment').length;
+  document.getElementById('p-fear').textContent = entries.filter(e=>e.type==='fear').length;
+
+  const ac = {};
+  entries.forEach(e => (e.affects||[]).forEach(a => { ac[a]=(ac[a]||0)+1; }));
+  const sa = Object.entries(ac).sort((a,b)=>b[1]-a[1]);
+  const ap = document.getElementById('affects-pattern');
+  ap.innerHTML = sa.length ? sa.map(([k,v])=>`<div class="pattern-row"><span>${k}</span><span class="pattern-count">${v}</span></div>`).join('') : '<div style="font-size:14px;color:var(--text2);padding:0.5rem 0">No data yet</div>';
+
+  const sc = {};
+  entries.forEach(e => { const s=e.subject.toLowerCase().trim(); sc[s]=(sc[s]||0)+1; });
+  const repeats = Object.entries(sc).filter(([,v])=>v>1).sort((a,b)=>b[1]-a[1]);
+  const sp = document.getElementById('subjects-pattern');
+  sp.innerHTML = repeats.length ? repeats.map(([k,v])=>`<div class="pattern-row"><span style="text-transform:capitalize">${k}</span><span class="pattern-count">${v}×</span></div>`).join('') : '<div style="font-size:14px;color:var(--text2);padding:0.5rem 0">No repeating subjects yet</div>';
+}
+
+async function getPatternReflection() {
+  if (!entries.length) { alert('Add some entries first.'); return; }
+  if (!apiKey) { alert('Add your API key to get pattern reflections.'); return; }
+  document.getElementById('pattern-ai').style.display = 'block';
+  document.getElementById('pattern-ai-text').innerHTML = '<span class="ai-loading">Reviewing your inventory for patterns...</span>';
+  const summary = entries.map(e=>`[${e.type}] ${e.subject}: ${e.cause}. My part: ${e.mypart||'not written'}`).join('\n');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a compassionate AA sponsor reviewing someone's Step 4 inventory. Look across ALL entries and identify: recurring subjects or names, dominant themes (authority, abandonment, control, etc.), the most common areas of self affected, and patterns in how they describe their own part (or avoid it). Be warm, honest, and grounded in the Big Book's framework. End with one gentle question for them to sit with. Plain prose, 4-6 paragraphs.`,
+        messages: [{ role: 'user', content: `Here is my Step 4 inventory:\n\n${summary}` }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    document.getElementById('pattern-ai-text').textContent = data.content.map(b=>b.text||'').join('\n');
+  } catch(e) {
+    document.getElementById('pattern-ai-text').textContent = 'Could not connect. Check your API key.';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
